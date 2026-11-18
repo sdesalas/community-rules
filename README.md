@@ -21,6 +21,8 @@ rules/
   macos/...
   cross-platform/...
   integrations/aws/...               rules for a data source
+exceptions/
+  <list name>.ndjson                 one exception list per file, with its items
 LICENSE.txt                          Elastic License 2.0 (`source.license: Elastic-2.0`)
 ```
 
@@ -49,6 +51,17 @@ prefixed with its tactic.
 | Launch Agent Created by an Unusual Process | `macos` | Persistence |
 | Remote Script Downloaded and Piped to a Shell | `cross-platform` | Command and Control |
 | AWS CloudTrail Logging Stopped or Deleted | `integrations/aws` | Defense Evasion |
+
+## Exception lists
+
+`exceptions/` holds exception lists in the format Kibana exports and imports: one list per `.ndjson` file, with the
+list on the first line and one item on each following line. Import a file from **Security > Exceptions > Import**, or
+with `POST /api/exception_lists/_import`. The `list_id` and `item_id` are fixed, so importing a newer version of a file
+with `overwrite` set updates the same list and items.
+
+| List | List id | Items |
+|---|---|---|
+| Community: Internal IP Ranges | `community-internal-ip-ranges` | `source.ip` is any of `192.168.1.1` to `192.168.1.255` |
 
 ## Releases
 
