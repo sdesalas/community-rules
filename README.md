@@ -23,6 +23,8 @@ rules/
   integrations/aws/...               rules for a data source
 exceptions/
   <list name>.ndjson                 one exception list per file, with its items
+value-lists/
+  <list name>.yml                    one value list per file, with its items
 LICENSE.txt                          Elastic License 2.0 (`source.license: Elastic-2.0`)
 ```
 
@@ -62,6 +64,30 @@ with `overwrite` set updates the same list and items.
 | List | List id | Items |
 |---|---|---|
 | Community: Internal IP Ranges | `community-internal-ip-ranges` | `source.ip` is any of `192.168.1.1` to `192.168.1.255` |
+
+## Value lists
+
+`value-lists/` holds value lists, one per YAML file. The attributes are the ones Kibana takes when a value list is
+created (`POST /api/lists`), and `items` holds the values.
+
+```yaml
+id: community-compromised-ips      # fixed list id, optional in Kibana
+name: "Community: Compromised IPs" # required
+description: ...                   # required
+type: ip                           # required: ip, ip_range, keyword, text, ...
+version: 1                         # optional, defaults to 1
+meta:                              # optional, free-form
+  source: Elastic Community Rules
+items:                             # one value per entry, of the list's type
+  - 35.88.9.149
+```
+
+To load a file, create the list from the attributes above `items`, then import the items as text, one value per line
+(`POST /api/lists/items/_import?list_id=<id>`).
+
+| List | List id | Type | Items |
+|---|---|---|---|
+| Community: Compromised IPs | `community-compromised-ips` | `ip` | 581 |
 
 ## Releases
 
