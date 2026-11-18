@@ -71,7 +71,7 @@ with `overwrite` set updates the same list and items.
 created (`POST /api/lists`), and `items` holds the values.
 
 ```yaml
-id: community-compromised-ips      # fixed list id, optional in Kibana
+id: compromised-ips.txt         # fixed list id, optional in Kibana
 name: "Community: Compromised IPs" # required
 description: ...                   # required
 type: ip                           # required: ip, ip_range, keyword, text, ...
@@ -87,7 +87,7 @@ To load a file, create the list from the attributes above `items`, then import t
 
 | List | List id | Type | Items |
 |---|---|---|---|
-| Community: Compromised IPs | `community-compromised-ips` | `ip` | 581 |
+| Community: Compromised IPs | `compromised-ips.txt` | `ip` | 581 |
 
 ## Releases
 

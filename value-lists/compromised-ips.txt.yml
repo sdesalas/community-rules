@@ -1,4 +1,4 @@
-id: community-compromised-ips
+id: compromised-ips.txt
 name: "Community: Compromised IPs"
 description: IP addresses reported as compromised, for use in rule exceptions and rule queries.
 type: ip
