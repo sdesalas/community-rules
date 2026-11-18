@@ -1,0 +1,74 @@
+id: "43e413f3-946a-4898-be67-106ae7cae8cf_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies a shell started with a command line that redirects input and output to /dev/tcp. This is a common way to open a reverse shell with only the shell itself.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "auditbeat-*"
+    - "logs-auditd_manager.auditd-*"
+  language: eql
+  license: Elastic License v2
+  name: Potential Reverse Shell via /dev/tcp
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Potential Reverse Shell via /dev/tcp
+
+    ### Possible investigation steps
+
+    - Review the destination address and port in `process.command_line`.
+    - Check what the shell ran after it connected, and what started it.
+    - Isolate the host if the destination is not expected.
+
+    ### False positive analysis
+
+    - Some health checks open /dev/tcp sockets to test a port. Exclude them by parent process once confirmed.
+  query: |
+    process where host.os.type == "linux" and event.type == "start" and
+      event.action in ("exec", "exec_event", "start", "ProcessRollup2", "executed", "process_started") and
+      process.name in ("bash", "sh", "zsh", "dash") and process.args == "-c" and
+      process.command_line like "*/dev/tcp/*"
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+    - package: auditd_manager
+      version: ">=1.18.0"
+  risk_score: 73
+  rule_id: "43e413f3-946a-4898-be67-106ae7cae8cf"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: high
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Linux"
+    - "Use Case: Threat Detection"
+    - "Tactic: Execution"
+    - "Data Source: Elastic Defend"
+    - "Data Source: Auditd Manager"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: "MITRE ATT&CK"
+      tactic:
+        id: TA0002
+        name: Execution
+        reference: "https://attack.mitre.org/tactics/TA0002/"
+      technique:
+        - id: T1059
+          name: Command and Scripting Interpreter
+          reference: "https://attack.mitre.org/techniques/T1059/"
+          subtechnique:
+            - id: T1059.004
+              name: Unix Shell
+              reference: "https://attack.mitre.org/techniques/T1059/004/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1

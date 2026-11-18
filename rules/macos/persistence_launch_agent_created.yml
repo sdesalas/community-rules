@@ -1,0 +1,54 @@
+id: "44594ae4-d8db-4a54-9d88-a9bea35d447e_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies a launch agent property list created by a process that is not an installer. Adversaries create launch agents to run code every time a user logs in.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.file*"
+  language: eql
+  license: Elastic License v2
+  name: Launch Agent Created by an Unusual Process
+  query: |
+    file where host.os.type == "macos" and event.type == "creation" and
+      file.path like ("/Users/*/Library/LaunchAgents/*.plist", "/Library/LaunchAgents/*.plist") and
+      not process.name in ("installd", "Installer", "mdmclient", "system_installd") and
+      not process.executable like "/Applications/*"
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 47
+  rule_id: "44594ae4-d8db-4a54-9d88-a9bea35d447e"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: macOS"
+    - "Use Case: Threat Detection"
+    - "Tactic: Persistence"
+    - "Data Source: Elastic Defend"
+    - "Source: Community"
+  threat:
+    - framework: "MITRE ATT&CK"
+      tactic:
+        id: TA0003
+        name: Persistence
+        reference: "https://attack.mitre.org/tactics/TA0003/"
+      technique:
+        - id: T1543
+          name: Create or Modify System Process
+          reference: "https://attack.mitre.org/techniques/T1543/"
+          subtechnique:
+            - id: T1543.001
+              name: Launch Agent
+              reference: "https://attack.mitre.org/techniques/T1543/001/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1

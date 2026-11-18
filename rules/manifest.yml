@@ -1,0 +1,25 @@
+categories:
+  - security
+  - siem
+conditions:
+  elastic:
+    capabilities:
+      - security
+    subscription: basic
+  kibana:
+    version: ^9.6.0
+description: Detection rules contributed by the Elastic community
+format_version: 3.0.0
+icons:
+  - size: 64x64
+    src: /elastic-logo-color.svg
+    type: image/svg+xml
+name: elastic_community_rules
+owner:
+  github: sdesalas
+  type: community
+source:
+  license: Elastic-2.0
+title: Elastic Community Rules
+type: integration
+version: 0.0.1

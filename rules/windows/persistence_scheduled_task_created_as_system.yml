@@ -1,0 +1,55 @@
+id: "0fd72ddc-4c1d-487c-929a-bd8d20755189_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies the creation of a scheduled task that runs as SYSTEM using schtasks.exe. Adversaries use scheduled tasks to persist and to run code with elevated privileges.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "winlogbeat-*"
+    - "logs-windows.sysmon_operational-*"
+  language: eql
+  license: Elastic License v2
+  name: Scheduled Task Created to Run as SYSTEM
+  query: |
+    process where host.os.type == "windows" and event.type == "start" and
+      process.name : "schtasks.exe" and process.args : "/create" and
+      process.args : "/ru" and process.args : ("SYSTEM", "NT AUTHORITY\\SYSTEM")
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 47
+  rule_id: "0fd72ddc-4c1d-487c-929a-bd8d20755189"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "Use Case: Threat Detection"
+    - "Tactic: Persistence"
+    - "Data Source: Elastic Defend"
+    - "Source: Community"
+  threat:
+    - framework: "MITRE ATT&CK"
+      tactic:
+        id: TA0003
+        name: Persistence
+        reference: "https://attack.mitre.org/tactics/TA0003/"
+      technique:
+        - id: T1053
+          name: Scheduled Task/Job
+          reference: "https://attack.mitre.org/techniques/T1053/"
+          subtechnique:
+            - id: T1053.005
+              name: Scheduled Task
+              reference: "https://attack.mitre.org/techniques/T1053/005/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1

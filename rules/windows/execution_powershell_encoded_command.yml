@@ -1,0 +1,70 @@
+id: a745805b-5f26-4fc4-a20c-63479ed12234_1
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies PowerShell launched with an encoded command. Adversaries encode commands to hide the script they run from casual inspection and from simple string matching.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "winlogbeat-*"
+    - "logs-windows.sysmon_operational-*"
+  language: eql
+  license: Elastic License v2
+  name: PowerShell Encoded Command Execution
+  note: |
+    ## Triage and analysis
+
+    ### Investigating PowerShell Encoded Command Execution
+
+    ### Possible investigation steps
+
+    - Decode the base64 payload in `process.command_line` and review what it runs.
+    - Review the parent process and the user that started PowerShell.
+    - Check for network connections or file writes by the same process.
+
+    ### False positive analysis
+
+    - Management and deployment tools sometimes pass encoded commands. Exclude their parent processes once confirmed.
+  query: |
+    process where host.os.type == "windows" and event.type == "start" and
+      process.name : ("powershell.exe", "pwsh.exe") and
+      process.args : ("-enc", "-EncodedCommand", "-ec")
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 47
+  rule_id: a745805b-5f26-4fc4-a20c-63479ed12234
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "Use Case: Threat Detection"
+    - "Tactic: Execution"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: "MITRE ATT&CK"
+      tactic:
+        id: TA0002
+        name: Execution
+        reference: "https://attack.mitre.org/tactics/TA0002/"
+      technique:
+        - id: T1059
+          name: Command and Scripting Interpreter
+          reference: "https://attack.mitre.org/techniques/T1059/"
+          subtechnique:
+            - id: T1059.001
+              name: PowerShell
+              reference: "https://attack.mitre.org/techniques/T1059/001/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1

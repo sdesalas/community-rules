@@ -1,0 +1,54 @@
+id: f82d97f4-3a5b-4877-8237-1cebce5a3188_1
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies cron files created or changed by a process that is not a package manager or a known scheduler. Adversaries add cron jobs to run code on a schedule and to persist across reboots.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.file*"
+    - "auditbeat-*"
+  language: eql
+  license: Elastic License v2
+  name: Cron Job Created by an Unusual Process
+  query: |
+    file where host.os.type == "linux" and event.type in ("creation", "change") and
+      file.path like ("/etc/cron.d/*", "/etc/crontab", "/var/spool/cron/*", "/var/spool/cron/crontabs/*") and
+      not process.executable in ("/usr/bin/dpkg", "/usr/bin/rpm", "/usr/bin/yum", "/usr/bin/dnf", "/usr/bin/apt", "/usr/bin/crontab")
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 47
+  rule_id: f82d97f4-3a5b-4877-8237-1cebce5a3188
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Linux"
+    - "Use Case: Threat Detection"
+    - "Tactic: Persistence"
+    - "Data Source: Elastic Defend"
+    - "Source: Community"
+  threat:
+    - framework: "MITRE ATT&CK"
+      tactic:
+        id: TA0003
+        name: Persistence
+        reference: "https://attack.mitre.org/tactics/TA0003/"
+      technique:
+        - id: T1053
+          name: Scheduled Task/Job
+          reference: "https://attack.mitre.org/techniques/T1053/"
+          subtechnique:
+            - id: T1053.003
+              name: Cron
+              reference: "https://attack.mitre.org/techniques/T1053/003/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1

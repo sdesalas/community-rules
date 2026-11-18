@@ -1,0 +1,66 @@
+id: "133f1e5c-0171-4dde-aff2-d6ce663631e3_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies the deletion of volume shadow copies with vssadmin.exe or wmic.exe. Ransomware operators delete shadow copies to prevent recovery of encrypted files.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "winlogbeat-*"
+    - "logs-windows.sysmon_operational-*"
+  language: eql
+  license: Elastic License v2
+  name: Volume Shadow Copies Deleted via Command Line
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Volume Shadow Copies Deleted via Command Line
+
+    ### Possible investigation steps
+
+    - Identify the parent process and the user. Backup software rarely deletes every shadow copy.
+    - Look for file renames or new file extensions on the host around the same time.
+    - Isolate the host if encryption activity is confirmed.
+
+    ### False positive analysis
+
+    - Backup and disk cleanup tools may delete shadow copies. Exclude them by parent executable once confirmed.
+  query: |
+    process where host.os.type == "windows" and event.type == "start" and
+      ((process.name : "vssadmin.exe" and process.args : "delete" and process.args : "shadows") or
+       (process.name : "wmic.exe" and process.args : "shadowcopy" and process.args : "delete"))
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 73
+  rule_id: "133f1e5c-0171-4dde-aff2-d6ce663631e3"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: high
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "Use Case: Threat Detection"
+    - "Tactic: Impact"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: "MITRE ATT&CK"
+      tactic:
+        id: TA0040
+        name: Impact
+        reference: "https://attack.mitre.org/tactics/TA0040/"
+      technique:
+        - id: T1490
+          name: Inhibit System Recovery
+          reference: "https://attack.mitre.org/techniques/T1490/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1

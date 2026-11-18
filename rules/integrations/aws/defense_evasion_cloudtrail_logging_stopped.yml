@@ -1,0 +1,53 @@
+id: fa447c85-d6f5-4f78-adf9-05459501d081_1
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: "Identifies a CloudTrail trail that was stopped, deleted or updated. Adversaries disable cloud logging to hide their activity."
+  false_positives:
+    - Planned changes to trail configuration by cloud administrators.
+  from: now-9m
+  index:
+    - "filebeat-*"
+    - "logs-aws.cloudtrail-*"
+  language: kuery
+  license: Elastic License v2
+  name: AWS CloudTrail Logging Stopped or Deleted
+  query: |
+    event.dataset:aws.cloudtrail and event.provider:cloudtrail.amazonaws.com and
+      event.action:(StopLogging or DeleteTrail or UpdateTrail) and event.outcome:success
+  related_integrations:
+    - integration: cloudtrail
+      package: aws
+      version: ">=2.0.0"
+  risk_score: 47
+  rule_id: fa447c85-d6f5-4f78-adf9-05459501d081
+  setup: |
+    ## Setup
+
+    This rule requires the AWS CloudTrail integration to be installed and collecting logs.
+  severity: medium
+  tags:
+    - "Domain: Cloud"
+    - "Data Source: AWS"
+    - "Data Source: AWS CloudTrail"
+    - "Use Case: Threat Detection"
+    - "Tactic: Defense Evasion"
+    - "Source: Community"
+  threat:
+    - framework: "MITRE ATT&CK"
+      tactic:
+        id: TA0005
+        name: Defense Evasion
+        reference: "https://attack.mitre.org/tactics/TA0005/"
+      technique:
+        - id: T1562
+          name: Impair Defenses
+          reference: "https://attack.mitre.org/techniques/T1562/"
+          subtechnique:
+            - id: T1562.008
+              name: Disable or Modify Cloud Logs
+              reference: "https://attack.mitre.org/techniques/T1562/008/"
+  timestamp_override: event.ingested
+  type: query
+  version: 1
