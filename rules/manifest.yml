@@ -11,7 +11,7 @@ conditions:
 description: Detection rules contributed by the Elastic community
 format_version: 3.0.0
 icons:
-  - size: 64x64
+  - size: 32x32
     src: /elastic-logo-color.svg
     type: image/svg+xml
 name: elastic_community_rules
