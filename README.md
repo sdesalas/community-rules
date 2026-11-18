@@ -1,4 +1,4 @@
-# Elastic Community Rules
+<h1><img src="rules/elastic-logo-color.svg" width="32" height="32"/>  Elastic Community Rules</h1>
 
 A detection rule library in git, with ten sample rules. It shows a second rule source for Elastic Security, next to
 the prebuilt rules, delivered the same way as
