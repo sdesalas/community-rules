@@ -1,0 +1,62 @@
+id: "7c82c8c7-dbe7-5734-a119-3a25ea1b26b6_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies an Okta API token being created. A token acts with its creator's admin rights and keeps working after their session ends.
+  from: now-9m
+  index:
+    - "filebeat-*"
+    - "logs-okta.system*"
+  language: kuery
+  license: Elastic License v2
+  name: Okta API Token Created
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Okta API Token Created
+
+    ### Possible investigation steps
+
+    - Confirm the token with its creator.
+    - Revoke it if it was not expected.
+
+    ### False positive analysis
+
+    - Integrations need tokens. Confirm with the identity team.
+  query: |
+    event.dataset:okta.system and event.action:system.api_token.create
+  related_integrations:
+    - package: okta
+      version: ">=3.0.0"
+  risk_score: 47
+  rule_id: "7c82c8c7-dbe7-5734-a119-3a25ea1b26b6"
+  setup: |
+    ## Setup
+
+    This rule requires the Okta integration to be installed and collecting system logs.
+  severity: medium
+  tags:
+    - "Domain: Identity"
+    - "Use Case: Threat Detection"
+    - "Tactic: Persistence"
+    - "Data Source: Okta"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0003
+        name: Persistence
+        reference: "https://attack.mitre.org/tactics/TA0003/"
+      technique:
+        - id: T1098
+          name: Account Manipulation
+          reference: "https://attack.mitre.org/techniques/T1098/"
+          subtechnique:
+            - id: T1098.001
+              name: Additional Cloud Credentials
+              reference: "https://attack.mitre.org/techniques/T1098/001/"
+  timestamp_override: event.ingested
+  type: query
+  version: 1

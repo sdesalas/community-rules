@@ -1,0 +1,62 @@
+id: "022cbf77-ffe4-58eb-a01c-063d36099c87_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies a repository's visibility being changed. A private repository made public exposes its code and history to everyone.
+  from: now-9m
+  index:
+    - "logs-github.audit-*"
+  language: kuery
+  license: Elastic License v2
+  name: GitHub Repository Visibility Changed
+  note: |
+    ## Triage and analysis
+
+    ### Investigating GitHub Repository Visibility Changed
+
+    ### Possible investigation steps
+
+    - Check the repository's new visibility.
+    - Confirm the change with the repository owners.
+
+    ### False positive analysis
+
+    - Open-sourcing a project. Confirm with the owners.
+  query: |
+    event.dataset:"github.audit" and event.action:"repo.access"
+  related_integrations:
+    - integration: audit
+      package: github
+      version: ">=2.0.0"
+  risk_score: 47
+  rule_id: "022cbf77-ffe4-58eb-a01c-063d36099c87"
+  setup: |
+    ## Setup
+
+    This rule requires the GitHub integration to be installed and collecting organization audit logs.
+  severity: medium
+  tags:
+    - "Domain: SaaS"
+    - "Use Case: Threat Detection"
+    - "Tactic: Exfiltration"
+    - "Data Source: GitHub"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0010
+        name: Exfiltration
+        reference: "https://attack.mitre.org/tactics/TA0010/"
+      technique:
+        - id: T1567
+          name: Exfiltration Over Web Service
+          reference: "https://attack.mitre.org/techniques/T1567/"
+          subtechnique:
+            - id: T1567.001
+              name: Exfiltration to Code Repository
+              reference: "https://attack.mitre.org/techniques/T1567/001/"
+  timestamp_override: event.ingested
+  type: query
+  version: 1

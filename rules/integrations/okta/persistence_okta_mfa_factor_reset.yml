@@ -1,0 +1,66 @@
+id: "41167f7a-b6b8-5f44-967f-eb6483268503_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies one admin resetting or deactivating five or more users' MFA factors within the rule window. Attackers reset MFA so they can enroll their own device.
+  from: now-9m
+  index:
+    - "filebeat-*"
+    - "logs-okta.system*"
+  language: kuery
+  license: Elastic License v2
+  name: Multiple Okta MFA Factors Reset by One Admin
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Multiple Okta MFA Factors Reset by One Admin
+
+    ### Possible investigation steps
+
+    - List the users affected and confirm with them.
+    - Check the admin's own recent logins.
+
+    ### False positive analysis
+
+    - Help desk staff resetting factors for new phones. Exclude their accounts.
+  query: |
+    event.dataset:okta.system and event.action:(user.mfa.factor.deactivate or user.mfa.factor.reset_all)
+  related_integrations:
+    - package: okta
+      version: ">=3.0.0"
+  risk_score: 47
+  rule_id: "41167f7a-b6b8-5f44-967f-eb6483268503"
+  setup: |
+    ## Setup
+
+    This rule requires the Okta integration to be installed and collecting system logs.
+  severity: medium
+  tags:
+    - "Domain: Identity"
+    - "Use Case: Threat Detection"
+    - "Tactic: Persistence"
+    - "Data Source: Okta"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0003
+        name: Persistence
+        reference: "https://attack.mitre.org/tactics/TA0003/"
+      technique:
+        - id: T1556
+          name: Modify Authentication Process
+          reference: "https://attack.mitre.org/techniques/T1556/"
+          subtechnique:
+            - id: T1556.006
+              name: Multi-Factor Authentication
+              reference: "https://attack.mitre.org/techniques/T1556/006/"
+  threshold:
+    field:
+      - okta.actor.alternate_id
+    value: 5
+  timestamp_override: event.ingested
+  type: threshold
+  version: 1
