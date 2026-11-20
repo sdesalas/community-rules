@@ -1,0 +1,82 @@
+id: "285ef676-5c89-5e27-bf96-58c620e39f61_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies the PsExec service binary starting on a host, which means someone ran PsExec against it from another host.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "winlogbeat-*"
+    - "logs-windows.sysmon_operational-*"
+  language: eql
+  license: Elastic License v2
+  name: PsExec Service Started on a Host
+  note: |
+    ## Triage and analysis
+
+    ### Investigating PsExec Service Started on a Host
+
+    ### Possible investigation steps
+
+    - Find the source host in the logon events.
+    - Review the commands run through the service.
+
+    ### False positive analysis
+
+    - Administrators use PsExec. Exclude their source hosts.
+  query: |
+    process where host.os.type == "windows" and event.type == "start" and
+      process.name : ("PSEXESVC.exe", "PAExec*.exe", "csexecsvc.exe")
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 47
+  rule_id: "285ef676-5c89-5e27-bf96-58c620e39f61"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "Use Case: Threat Detection"
+    - "Tactic: Lateral Movement"
+    - "Tactic: Execution"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0008
+        name: Lateral Movement
+        reference: "https://attack.mitre.org/tactics/TA0008/"
+      technique:
+        - id: T1021
+          name: Remote Services
+          reference: "https://attack.mitre.org/techniques/T1021/"
+          subtechnique:
+            - id: T1021.002
+              name: SMB/Windows Admin Shares
+              reference: "https://attack.mitre.org/techniques/T1021/002/"
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0002
+        name: Execution
+        reference: "https://attack.mitre.org/tactics/TA0002/"
+      technique:
+        - id: T1569
+          name: System Services
+          reference: "https://attack.mitre.org/techniques/T1569/"
+          subtechnique:
+            - id: T1569.002
+              name: Service Execution
+              reference: "https://attack.mitre.org/techniques/T1569/002/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1

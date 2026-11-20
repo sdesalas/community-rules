@@ -1,0 +1,78 @@
+id: d78638b2-0a4b-59a4-bdf6-f27000d76426_1
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies sc.exe creating a service on another host. A remote service runs its binary as SYSTEM on the target.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "winlogbeat-*"
+    - "logs-windows.sysmon_operational-*"
+  language: eql
+  license: Elastic License v2
+  name: Service Created on a Remote Host via Sc
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Service Created on a Remote Host via Sc
+
+    ### Possible investigation steps
+
+    - Review the binary path of the new service.
+    - Check the target host for the service and remove it.
+
+    ### False positive analysis
+
+    - Administrators installing agents. Exclude their accounts.
+  query: |
+    process where host.os.type == "windows" and event.type == "start" and
+      process.name : "sc.exe" and process.args : "\\\\*" and process.args : "create"
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 47
+  rule_id: d78638b2-0a4b-59a4-bdf6-f27000d76426
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "Use Case: Threat Detection"
+    - "Tactic: Lateral Movement"
+    - "Tactic: Persistence"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0008
+        name: Lateral Movement
+        reference: "https://attack.mitre.org/tactics/TA0008/"
+      technique:
+        - id: T1021
+          name: Remote Services
+          reference: "https://attack.mitre.org/techniques/T1021/"
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0003
+        name: Persistence
+        reference: "https://attack.mitre.org/tactics/TA0003/"
+      technique:
+        - id: T1543
+          name: Create or Modify System Process
+          reference: "https://attack.mitre.org/techniques/T1543/"
+          subtechnique:
+            - id: T1543.003
+              name: Windows Service
+              reference: "https://attack.mitre.org/techniques/T1543/003/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1
