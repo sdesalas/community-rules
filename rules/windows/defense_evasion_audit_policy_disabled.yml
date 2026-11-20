@@ -1,0 +1,69 @@
+id: bc7b0220-50f8-573a-bdad-ea5e545dc208_1
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies auditpol turning off auditing for a category or clearing the audit policy, which stops Windows from logging the activity.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "winlogbeat-*"
+    - "logs-windows.sysmon_operational-*"
+  language: eql
+  license: Elastic License v2
+  name: Audit Policy Disabled via Auditpol
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Audit Policy Disabled via Auditpol
+
+    ### Possible investigation steps
+
+    - Restore the audit policy from group policy.
+    - Review what the account did after the change.
+
+    ### False positive analysis
+
+    - Tuning noisy categories during troubleshooting. Confirm with the owner.
+  query: |
+    process where host.os.type == "windows" and event.type == "start" and
+      process.name : "auditpol.exe" and
+      (process.args : "/clear" or (process.args : "/set" and process.command_line : ("*/success:disable*", "*/failure:disable*")))
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 47
+  rule_id: bc7b0220-50f8-573a-bdad-ea5e545dc208
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "Use Case: Threat Detection"
+    - "Tactic: Defense Evasion"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0005
+        name: Defense Evasion
+        reference: "https://attack.mitre.org/tactics/TA0005/"
+      technique:
+        - id: T1562
+          name: Impair Defenses
+          reference: "https://attack.mitre.org/techniques/T1562/"
+          subtechnique:
+            - id: T1562.002
+              name: Disable Windows Event Logging
+              reference: "https://attack.mitre.org/techniques/T1562/002/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1

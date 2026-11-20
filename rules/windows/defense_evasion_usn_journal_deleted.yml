@@ -1,0 +1,64 @@
+id: "6b4e9054-ed50-5411-85f8-66670f6b1af7_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies fsutil deleting the NTFS update sequence number journal, which records file changes and is used in investigations.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "winlogbeat-*"
+    - "logs-windows.sysmon_operational-*"
+  language: eql
+  license: Elastic License v2
+  name: USN Journal Deleted via Fsutil
+  note: |
+    ## Triage and analysis
+
+    ### Investigating USN Journal Deleted via Fsutil
+
+    ### Possible investigation steps
+
+    - Review the files written on the host shortly before the deletion.
+    - Check for other anti-forensics on the host.
+
+    ### False positive analysis
+
+    - Rarely used by disk maintenance tools. Confirm with the owner.
+  query: |
+    process where host.os.type == "windows" and event.type == "start" and
+      process.name : "fsutil.exe" and process.args : "usn" and process.args : "deletejournal"
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 47
+  rule_id: "6b4e9054-ed50-5411-85f8-66670f6b1af7"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "Use Case: Threat Detection"
+    - "Tactic: Defense Evasion"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0005
+        name: Defense Evasion
+        reference: "https://attack.mitre.org/tactics/TA0005/"
+      technique:
+        - id: T1070
+          name: Indicator Removal
+          reference: "https://attack.mitre.org/techniques/T1070/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1
