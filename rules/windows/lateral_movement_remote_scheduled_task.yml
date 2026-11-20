@@ -1,0 +1,78 @@
+id: "95ec6c7a-3a78-5b94-a72d-4ab61d3dd3ca_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies schtasks creating a task on another host with /s. Remote tasks are a common way to run code on other hosts with stolen credentials.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "winlogbeat-*"
+    - "logs-windows.sysmon_operational-*"
+  language: eql
+  license: Elastic License v2
+  name: Scheduled Task Created on a Remote Host
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Scheduled Task Created on a Remote Host
+
+    ### Possible investigation steps
+
+    - Identify the target host and the task's command.
+    - Delete the task if it was not expected.
+
+    ### False positive analysis
+
+    - Software deployment scripts. Exclude them by `user.name`.
+  query: |
+    process where host.os.type == "windows" and event.type == "start" and
+      process.name : "schtasks.exe" and process.args : "/create" and process.args : "/s"
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 47
+  rule_id: "95ec6c7a-3a78-5b94-a72d-4ab61d3dd3ca"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "Use Case: Threat Detection"
+    - "Tactic: Lateral Movement"
+    - "Tactic: Execution"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0008
+        name: Lateral Movement
+        reference: "https://attack.mitre.org/tactics/TA0008/"
+      technique:
+        - id: T1021
+          name: Remote Services
+          reference: "https://attack.mitre.org/techniques/T1021/"
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0002
+        name: Execution
+        reference: "https://attack.mitre.org/tactics/TA0002/"
+      technique:
+        - id: T1053
+          name: Scheduled Task/Job
+          reference: "https://attack.mitre.org/techniques/T1053/"
+          subtechnique:
+            - id: T1053.005
+              name: Scheduled Task
+              reference: "https://attack.mitre.org/techniques/T1053/005/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1

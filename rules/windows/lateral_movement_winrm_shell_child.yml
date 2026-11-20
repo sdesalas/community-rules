@@ -1,0 +1,68 @@
+id: a793d0cb-9a1e-56a9-8fa9-3fe712260f7f_1
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies cmd or PowerShell started by the WinRM provider host, which runs commands for remote PowerShell sessions.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "winlogbeat-*"
+    - "logs-windows.sysmon_operational-*"
+  language: eql
+  license: Elastic License v2
+  name: Shell Started by a WinRM Remote Session
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Shell Started by a WinRM Remote Session
+
+    ### Possible investigation steps
+
+    - Identify the source host from the WinRM logon.
+    - Review the commands run in the session.
+
+    ### False positive analysis
+
+    - Configuration management runs over WinRM. Exclude its accounts.
+  query: |
+    process where host.os.type == "windows" and event.type == "start" and
+      process.parent.name : "wsmprovhost.exe" and process.name : ("cmd.exe", "powershell.exe", "pwsh.exe", "rundll32.exe", "mshta.exe")
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 21
+  rule_id: a793d0cb-9a1e-56a9-8fa9-3fe712260f7f
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: low
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "Use Case: Threat Detection"
+    - "Tactic: Lateral Movement"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0008
+        name: Lateral Movement
+        reference: "https://attack.mitre.org/tactics/TA0008/"
+      technique:
+        - id: T1021
+          name: Remote Services
+          reference: "https://attack.mitre.org/techniques/T1021/"
+          subtechnique:
+            - id: T1021.006
+              name: Windows Remote Management
+              reference: "https://attack.mitre.org/techniques/T1021/006/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1
