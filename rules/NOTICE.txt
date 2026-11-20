@@ -1,6 +1,0 @@
-Elastic Community Rules
-Copyright Elasticsearch B.V.
-
-Licensed under the Elastic License 2.0. See LICENSE.txt.
-
-The rules are sample content. They are written for demonstration and are not tested for production use.

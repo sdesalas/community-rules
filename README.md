@@ -1,4 +1,4 @@
-<h1><img src="rules/elastic-logo-color.svg" width="32" height="32"/>  Elastic Community Rules</h1>
+<h1><img src="elastic-logo-color.svg" width="32" height="32"/>  Elastic Community Rules</h1>
 
 A detection rule library in git, with ten sample rules. It shows a second rule source for Elastic Security, next to
 the prebuilt rules, delivered the same way as
@@ -10,12 +10,12 @@ The rules are sample content for demonstration. They are not tested for producti
 ## Layout
 
 ```
+manifest.yml                         package manifest (name, version, kibana.version condition)
+changelog.yml                        one entry per release
+elastic-logo-color.svg               the package icon (the manifest's `icons`)
+LICENSE.txt                          Elastic License 2.0 (`source.license: Elastic-2.0`)
 rules/
-  manifest.yml                       package manifest (name, version, kibana.version condition)
-  changelog.yml                      one entry per release
-  NOTICE.txt                         notice shipped with the package
   README.md                          the package description
-  elastic-logo-color.svg             the package icon (the manifest's `icons`)
   windows/<rule file name>.yml       one file per rule
   linux/...
   macos/...
@@ -25,11 +25,10 @@ exceptions/
   <list name>.ndjson                 one exception list per file, with its items
 value-lists/
   <list name>.yml                    one value list per file, with its items
-LICENSE.txt                          Elastic License 2.0 (`source.license: Elastic-2.0`)
 ```
 
 - Every folder under `rules/` holds rule files, and only those. The folder a rule is in says where it belongs.
-- The package files stay directly in `rules/`.
+- The package files are at the root, because the manifest, changelog and license cover the rules, exception lists and value lists together.
 - One file per rule. Its git history is its list of versions, so don't add a file per version.
 
 ## Rule files

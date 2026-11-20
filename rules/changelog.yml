@@ -1,6 +1,0 @@
-# newer versions go on top
-- version: 0.0.1
-  changes:
-    - description: Initial release with 10 sample rules
-      type: enhancement
-      link: https://github.com/sdesalas/community-rules-library
