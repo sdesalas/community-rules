@@ -1,0 +1,75 @@
+id: "2454f56e-c420-59ec-b543-b17be5de4acb_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies bitsadmin creating a transfer job that downloads a file.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "winlogbeat-*"
+    - "logs-windows.sysmon_operational-*"
+  language: eql
+  license: Elastic License v2
+  name: File Downloaded via Bitsadmin
+  note: |
+    ## Triage and analysis
+
+    ### Investigating File Downloaded via Bitsadmin
+
+    ### Possible investigation steps
+
+    - Find the downloaded file and check it.
+    - List remaining BITS jobs with `bitsadmin /list /allusers`.
+
+    ### False positive analysis
+
+    - Old update scripts use bitsadmin. Exclude them by `process.parent.executable`.
+  query: |
+    process where host.os.type == "windows" and event.type == "start" and
+      process.name : "bitsadmin.exe" and process.args : ("/transfer", "/addfile", "/download") and
+      process.command_line : "*http*"
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 47
+  rule_id: "2454f56e-c420-59ec-b543-b17be5de4acb"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "Use Case: Threat Detection"
+    - "Tactic: Command and Control"
+    - "Tactic: Defense Evasion"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0011
+        name: Command and Control
+        reference: "https://attack.mitre.org/tactics/TA0011/"
+      technique:
+        - id: T1105
+          name: Ingress Tool Transfer
+          reference: "https://attack.mitre.org/techniques/T1105/"
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0005
+        name: Defense Evasion
+        reference: "https://attack.mitre.org/tactics/TA0005/"
+      technique:
+        - id: T1197
+          name: BITS Jobs
+          reference: "https://attack.mitre.org/techniques/T1197/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1

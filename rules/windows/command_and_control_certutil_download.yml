@@ -1,0 +1,65 @@
+id: "3b511e70-9cd1-5dcd-ad92-79d74a0c7836_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies certutil downloading a file with -urlcache or -verifyctl. Certutil is signed by Microsoft, so downloads through it pass simple allow lists.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "winlogbeat-*"
+    - "logs-windows.sysmon_operational-*"
+  language: eql
+  license: Elastic License v2
+  name: File Downloaded via Certutil
+  note: |
+    ## Triage and analysis
+
+    ### Investigating File Downloaded via Certutil
+
+    ### Possible investigation steps
+
+    - Find the downloaded file and check it.
+    - Review what ran it afterwards.
+
+    ### False positive analysis
+
+    - Rare in normal use. Confirm with the owner.
+  query: |
+    process where host.os.type == "windows" and event.type == "start" and
+      process.name : "certutil.exe" and process.args : ("-urlcache", "/urlcache", "-verifyctl", "/verifyctl") and
+      process.command_line : "*http*"
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 47
+  rule_id: "3b511e70-9cd1-5dcd-ad92-79d74a0c7836"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "Use Case: Threat Detection"
+    - "Tactic: Command and Control"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0011
+        name: Command and Control
+        reference: "https://attack.mitre.org/tactics/TA0011/"
+      technique:
+        - id: T1105
+          name: Ingress Tool Transfer
+          reference: "https://attack.mitre.org/techniques/T1105/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1

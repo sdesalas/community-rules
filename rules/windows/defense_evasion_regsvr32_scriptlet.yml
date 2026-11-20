@@ -1,0 +1,68 @@
+id: e83f7289-f4f6-5f0a-9cde-984f4aefad37_1
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies regsvr32 loading scrobj.dll with a /i argument that points at a URL. This runs a remote scriptlet without writing it to disk.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "winlogbeat-*"
+    - "logs-windows.sysmon_operational-*"
+  language: eql
+  license: Elastic License v2
+  name: Remote Scriptlet Run via Regsvr32
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Remote Scriptlet Run via Regsvr32
+
+    ### Possible investigation steps
+
+    - Fetch the scriptlet from a safe host and review it.
+    - Check for child processes of regsvr32.
+
+    ### False positive analysis
+
+    - None expected.
+  query: |
+    process where host.os.type == "windows" and event.type == "start" and
+      process.name : "regsvr32.exe" and process.command_line : "*scrobj*" and process.command_line : ("*/i:http*", "*-i:http*")
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 73
+  rule_id: e83f7289-f4f6-5f0a-9cde-984f4aefad37
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: high
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "Use Case: Threat Detection"
+    - "Tactic: Defense Evasion"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0005
+        name: Defense Evasion
+        reference: "https://attack.mitre.org/tactics/TA0005/"
+      technique:
+        - id: T1218
+          name: System Binary Proxy Execution
+          reference: "https://attack.mitre.org/techniques/T1218/"
+          subtechnique:
+            - id: T1218.010
+              name: Regsvr32
+              reference: "https://attack.mitre.org/techniques/T1218/010/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1
