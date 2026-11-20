@@ -1,0 +1,71 @@
+id: eba0a32b-f19f-556e-b38d-77e875ee1259_1
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies a systemd unit file created in a system folder by a process that is not a package manager or configuration tool.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.file*"
+  language: eql
+  license: Elastic License v2
+  name: Systemd Service Created by an Unusual Process
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Systemd Service Created by an Unusual Process
+
+    ### Possible investigation steps
+
+    - Review the unit's `ExecStart` and the binary it runs.
+    - Check whether the unit was enabled.
+
+    ### False positive analysis
+
+    - Install scripts of third-party software. Exclude them by `process.executable`.
+  query: |
+    file where host.os.type == "linux" and event.action in ("creation", "rename") and
+      file.path like ("/etc/systemd/system/*", "/usr/lib/systemd/system/*", "/lib/systemd/system/*") and
+      file.extension in ("service", "timer") and
+      not process.name in ("dpkg", "rpm", "yum", "dnf", "apt", "apt-get", "systemd", "ansible-playbook", "puppet", "chef-client", "salt-minion")
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+    - package: auditd_manager
+      version: ">=1.18.0"
+  risk_score: 47
+  rule_id: eba0a32b-f19f-556e-b38d-77e875ee1259
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Linux"
+    - "Use Case: Threat Detection"
+    - "Tactic: Persistence"
+    - "Data Source: Elastic Defend"
+    - "Data Source: Auditd Manager"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0003
+        name: Persistence
+        reference: "https://attack.mitre.org/tactics/TA0003/"
+      technique:
+        - id: T1543
+          name: Create or Modify System Process
+          reference: "https://attack.mitre.org/techniques/T1543/"
+          subtechnique:
+            - id: T1543.002
+              name: Systemd Service
+              reference: "https://attack.mitre.org/techniques/T1543/002/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1
