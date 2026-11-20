@@ -1,0 +1,73 @@
+id: "9daee8e8-24f5-5554-b68a-684370b2edbd_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies useradd or adduser creating a local account on the first run for that host in 14 days.
+  from: now-9m
+  history_window_start: now-14d
+  index:
+    - "logs-endpoint.events.process*"
+    - "auditbeat-*"
+    - "logs-auditd_manager.auditd-*"
+  language: kuery
+  license: Elastic License v2
+  name: Local User Account Created
+  new_terms_fields:
+    - host.id
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Local User Account Created
+
+    ### Possible investigation steps
+
+    - Review the new account's name, groups and shell.
+    - Identify who ran the command.
+
+    ### False positive analysis
+
+    - Provisioning tools create accounts. Exclude their parent processes.
+  query: |
+    host.os.type:linux and event.category:process and event.type:start and process.name:(useradd or adduser)
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+    - package: auditd_manager
+      version: ">=1.18.0"
+  risk_score: 21
+  rule_id: "9daee8e8-24f5-5554-b68a-684370b2edbd"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: low
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Linux"
+    - "Use Case: Threat Detection"
+    - "Tactic: Persistence"
+    - "Data Source: Elastic Defend"
+    - "Data Source: Auditd Manager"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0003
+        name: Persistence
+        reference: "https://attack.mitre.org/tactics/TA0003/"
+      technique:
+        - id: T1136
+          name: Create Account
+          reference: "https://attack.mitre.org/techniques/T1136/"
+          subtechnique:
+            - id: T1136.001
+              name: Local Account
+              reference: "https://attack.mitre.org/techniques/T1136/001/"
+  timestamp_override: event.ingested
+  type: new_terms
+  version: 1

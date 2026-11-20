@@ -1,0 +1,69 @@
+id: bd54d445-ac32-5b97-8940-f8af6ce9675f_1
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies a change to /etc/ld.so.preload. A library listed there is loaded into every dynamically linked process, which rootkits use to hide.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.file*"
+  language: eql
+  license: Elastic License v2
+  name: Dynamic Linker Preload File Modified
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Dynamic Linker Preload File Modified
+
+    ### Possible investigation steps
+
+    - Review the libraries listed in the file.
+    - Check the libraries' hashes and where they came from.
+
+    ### False positive analysis
+
+    - None expected on most hosts.
+  query: |
+    file where host.os.type == "linux" and event.action in ("creation", "modification", "rename") and
+      file.path == "/etc/ld.so.preload"
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+    - package: auditd_manager
+      version: ">=1.18.0"
+  risk_score: 73
+  rule_id: bd54d445-ac32-5b97-8940-f8af6ce9675f
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: high
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Linux"
+    - "Use Case: Threat Detection"
+    - "Tactic: Persistence"
+    - "Data Source: Elastic Defend"
+    - "Data Source: Auditd Manager"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0003
+        name: Persistence
+        reference: "https://attack.mitre.org/tactics/TA0003/"
+      technique:
+        - id: T1574
+          name: Hijack Execution Flow
+          reference: "https://attack.mitre.org/techniques/T1574/"
+          subtechnique:
+            - id: T1574.006
+              name: Dynamic Linker Hijacking
+              reference: "https://attack.mitre.org/techniques/T1574/006/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1
