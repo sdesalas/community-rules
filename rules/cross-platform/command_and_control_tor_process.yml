@@ -1,0 +1,68 @@
+id: "602db772-8408-5f2d-9f46-c32ff4150faa_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies the Tor client starting on a host. Malware uses Tor to reach its servers without revealing where they are.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+  language: eql
+  license: Elastic License v2
+  name: Tor Process Started
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Tor Process Started
+
+    ### Possible investigation steps
+
+    - Identify the parent process.
+    - Check the host for other signs of compromise.
+
+    ### False positive analysis
+
+    - Privacy-minded users. Confirm against your acceptable use policy.
+  query: |
+    process where event.type == "start" and process.name : ("tor", "tor.exe") and
+      not process.executable : ("*/Tor Browser.app/*", "*\\Tor Browser\\*")
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 47
+  rule_id: "602db772-8408-5f2d-9f46-c32ff4150faa"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "OS: Linux"
+    - "OS: macOS"
+    - "Use Case: Threat Detection"
+    - "Tactic: Command and Control"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0011
+        name: Command and Control
+        reference: "https://attack.mitre.org/tactics/TA0011/"
+      technique:
+        - id: T1090
+          name: Proxy
+          reference: "https://attack.mitre.org/techniques/T1090/"
+          subtechnique:
+            - id: T1090.003
+              name: Multi-hop Proxy
+              reference: "https://attack.mitre.org/techniques/T1090/003/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1
