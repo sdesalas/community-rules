@@ -1,0 +1,66 @@
+id: "885257f2-3689-5f1c-a7b2-0850b1b2cb79_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies spctl turning off Gatekeeper, which stops macOS from checking downloaded apps for a valid signature.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+  language: eql
+  license: Elastic License v2
+  name: Gatekeeper Disabled via Spctl
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Gatekeeper Disabled via Spctl
+
+    ### Possible investigation steps
+
+    - Turn Gatekeeper back on with `spctl --master-enable`.
+    - Check for unsigned apps run since.
+
+    ### False positive analysis
+
+    - None expected on managed Macs.
+  query: |
+    process where host.os.type == "macos" and event.type == "start" and
+      process.name == "spctl" and process.args in ("--master-disable", "--global-disable")
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 73
+  rule_id: "885257f2-3689-5f1c-a7b2-0850b1b2cb79"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: high
+  tags:
+    - "Domain: Endpoint"
+    - "OS: macOS"
+    - "Use Case: Threat Detection"
+    - "Tactic: Defense Evasion"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0005
+        name: Defense Evasion
+        reference: "https://attack.mitre.org/tactics/TA0005/"
+      technique:
+        - id: T1553
+          name: Subvert Trust Controls
+          reference: "https://attack.mitre.org/techniques/T1553/"
+          subtechnique:
+            - id: T1553.001
+              name: Gatekeeper Bypass
+              reference: "https://attack.mitre.org/techniques/T1553/001/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1
