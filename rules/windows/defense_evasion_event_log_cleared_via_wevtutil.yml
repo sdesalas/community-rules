@@ -1,0 +1,68 @@
+id: "2d381c50-73ca-5a0e-bd48-40fc972630d0_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies wevtutil clearing a Windows event log. Attackers clear the Security and System logs to remove evidence of what they did.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+    - "winlogbeat-*"
+    - "logs-windows.sysmon_operational-*"
+  language: eql
+  license: Elastic License v2
+  name: Windows Event Log Cleared via Wevtutil
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Windows Event Log Cleared via Wevtutil
+
+    ### Possible investigation steps
+
+    - Check which log was cleared and recover it from your log pipeline.
+    - Review the account and the session that ran it.
+
+    ### False positive analysis
+
+    - Image preparation scripts clear logs. Exclude them by `process.parent.executable`.
+  query: |
+    process where host.os.type == "windows" and event.type == "start" and
+      process.name : "wevtutil.exe" and process.args : ("cl", "clear-log")
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 47
+  rule_id: "2d381c50-73ca-5a0e-bd48-40fc972630d0"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: medium
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "Use Case: Threat Detection"
+    - "Tactic: Defense Evasion"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0005
+        name: Defense Evasion
+        reference: "https://attack.mitre.org/tactics/TA0005/"
+      technique:
+        - id: T1070
+          name: Indicator Removal
+          reference: "https://attack.mitre.org/techniques/T1070/"
+          subtechnique:
+            - id: T1070.001
+              name: Clear Windows Event Logs
+              reference: "https://attack.mitre.org/techniques/T1070/001/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1
