@@ -1,0 +1,66 @@
+id: "3aaf579a-bf68-5e5f-8572-c0b6b3c6f597_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies nmap, masscan, zmap or rustscan starting on a host for the first time in 14 days.
+  from: now-9m
+  history_window_start: now-14d
+  index:
+    - "logs-endpoint.events.process*"
+  language: kuery
+  license: Elastic License v2
+  name: Network Scanner Started
+  new_terms_fields:
+    - host.id
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Network Scanner Started
+
+    ### Possible investigation steps
+
+    - Review the targets in `process.args`.
+    - Identify the user and whether they are on the security team.
+
+    ### False positive analysis
+
+    - Security and network teams scan networks. Exclude their hosts.
+  query: |
+    event.category:process and event.type:start and process.name:(nmap or nmap.exe or masscan or zmap or rustscan or naabu)
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 21
+  rule_id: "3aaf579a-bf68-5e5f-8572-c0b6b3c6f597"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: low
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "OS: Linux"
+    - "OS: macOS"
+    - "Use Case: Threat Detection"
+    - "Tactic: Discovery"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0007
+        name: Discovery
+        reference: "https://attack.mitre.org/tactics/TA0007/"
+      technique:
+        - id: T1046
+          name: Network Service Discovery
+          reference: "https://attack.mitre.org/techniques/T1046/"
+  timestamp_override: event.ingested
+  type: new_terms
+  version: 1

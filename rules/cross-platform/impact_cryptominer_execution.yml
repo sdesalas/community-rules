@@ -1,0 +1,65 @@
+id: "29cc4274-0423-5203-93d9-1375f02ed1b9_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies a known cryptocurrency miner, or a process started with mining pool arguments.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+  language: eql
+  license: Elastic License v2
+  name: Cryptocurrency Miner Started
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Cryptocurrency Miner Started
+
+    ### Possible investigation steps
+
+    - Stop the process and find how it was started.
+    - Check other hosts for the same binary.
+
+    ### False positive analysis
+
+    - None expected on company hosts.
+  query: |
+    process where event.type == "start" and
+      (process.name : ("xmrig", "xmrig.exe", "xmr-stak*", "cpuminer*", "minerd", "t-rex*", "nbminer*") or
+        process.command_line : ("*stratum+tcp://*", "*stratum+ssl://*", "*--donate-level*"))
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 73
+  rule_id: "29cc4274-0423-5203-93d9-1375f02ed1b9"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: high
+  tags:
+    - "Domain: Endpoint"
+    - "OS: Windows"
+    - "OS: Linux"
+    - "OS: macOS"
+    - "Use Case: Threat Detection"
+    - "Tactic: Impact"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0040
+        name: Impact
+        reference: "https://attack.mitre.org/tactics/TA0040/"
+      technique:
+        - id: T1496
+          name: Resource Hijacking
+          reference: "https://attack.mitre.org/techniques/T1496/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1
