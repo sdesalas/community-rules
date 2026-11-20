@@ -1,0 +1,58 @@
+id: ac0ba11c-2d74-525b-af6b-b4f5cdd8bd95_1
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies a branch protection rule being deleted, which lets anyone with write access push to the branch without review.
+  from: now-9m
+  index:
+    - "logs-github.audit-*"
+  language: kuery
+  license: Elastic License v2
+  name: GitHub Branch Protection Rule Deleted
+  note: |
+    ## Triage and analysis
+
+    ### Investigating GitHub Branch Protection Rule Deleted
+
+    ### Possible investigation steps
+
+    - Restore the rule.
+    - Review commits pushed to the branch since.
+
+    ### False positive analysis
+
+    - Repository restructuring. Confirm with the owners.
+  query: |
+    event.dataset:"github.audit" and event.action:"protected_branch.destroy"
+  related_integrations:
+    - integration: audit
+      package: github
+      version: ">=2.0.0"
+  risk_score: 47
+  rule_id: ac0ba11c-2d74-525b-af6b-b4f5cdd8bd95
+  setup: |
+    ## Setup
+
+    This rule requires the GitHub integration to be installed and collecting organization audit logs.
+  severity: medium
+  tags:
+    - "Domain: SaaS"
+    - "Use Case: Threat Detection"
+    - "Tactic: Defense Evasion"
+    - "Data Source: GitHub"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0005
+        name: Defense Evasion
+        reference: "https://attack.mitre.org/tactics/TA0005/"
+      technique:
+        - id: T1562
+          name: Impair Defenses
+          reference: "https://attack.mitre.org/techniques/T1562/"
+  timestamp_override: event.ingested
+  type: query
+  version: 1

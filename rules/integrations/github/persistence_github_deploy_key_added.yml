@@ -1,0 +1,65 @@
+id: "803fcd3c-9a51-5d9f-9443-457123bd31e9_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies a user adding a deploy key to a repository for the first time in 30 days. A deploy key gives lasting access to the repository that is not tied to a person.
+  from: now-9m
+  history_window_start: now-30d
+  index:
+    - "logs-github.audit-*"
+  language: kuery
+  license: Elastic License v2
+  name: GitHub Deploy Key Added by a New User
+  new_terms_fields:
+    - user.name
+  note: |
+    ## Triage and analysis
+
+    ### Investigating GitHub Deploy Key Added by a New User
+
+    ### Possible investigation steps
+
+    - Check whether the key has write access.
+    - Confirm the key with the repository owners.
+
+    ### False positive analysis
+
+    - Setting up CI for a new repository. Confirm with the owners.
+  query: |
+    event.dataset:"github.audit" and event.action:"repo.add_deploy_key"
+  related_integrations:
+    - integration: audit
+      package: github
+      version: ">=2.0.0"
+  risk_score: 21
+  rule_id: "803fcd3c-9a51-5d9f-9443-457123bd31e9"
+  setup: |
+    ## Setup
+
+    This rule requires the GitHub integration to be installed and collecting organization audit logs.
+  severity: low
+  tags:
+    - "Domain: SaaS"
+    - "Use Case: Threat Detection"
+    - "Tactic: Persistence"
+    - "Data Source: GitHub"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0003
+        name: Persistence
+        reference: "https://attack.mitre.org/tactics/TA0003/"
+      technique:
+        - id: T1098
+          name: Account Manipulation
+          reference: "https://attack.mitre.org/techniques/T1098/"
+          subtechnique:
+            - id: T1098.001
+              name: Additional Cloud Credentials
+              reference: "https://attack.mitre.org/techniques/T1098/001/"
+  timestamp_override: event.ingested
+  type: new_terms
+  version: 1
