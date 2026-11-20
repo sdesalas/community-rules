@@ -1,0 +1,81 @@
+id: f05107d7-37a6-5c84-945c-b43aa9be0d0f_1
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies dscl creating a user that is hidden from the login window or adding a user to the admin group.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+  language: eql
+  license: Elastic License v2
+  name: Hidden Admin Account Created via Dscl
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Hidden Admin Account Created via Dscl
+
+    ### Possible investigation steps
+
+    - List local users and admins with `dscl . list /Users`.
+    - Remove the account if it was not expected.
+
+    ### False positive analysis
+
+    - MDM tools create hidden admin accounts. Exclude them by `process.parent.executable`.
+  query: |
+    process where host.os.type == "macos" and event.type == "start" and
+      process.name == "dscl" and
+      (process.command_line like~ "*IsHidden*1*" or (process.args == "-append" and process.command_line like~ "*/Groups/admin*GroupMembership*"))
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 73
+  rule_id: f05107d7-37a6-5c84-945c-b43aa9be0d0f
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: high
+  tags:
+    - "Domain: Endpoint"
+    - "OS: macOS"
+    - "Use Case: Threat Detection"
+    - "Tactic: Persistence"
+    - "Tactic: Defense Evasion"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0003
+        name: Persistence
+        reference: "https://attack.mitre.org/tactics/TA0003/"
+      technique:
+        - id: T1136
+          name: Create Account
+          reference: "https://attack.mitre.org/techniques/T1136/"
+          subtechnique:
+            - id: T1136.001
+              name: Local Account
+              reference: "https://attack.mitre.org/techniques/T1136/001/"
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0005
+        name: Defense Evasion
+        reference: "https://attack.mitre.org/tactics/TA0005/"
+      technique:
+        - id: T1564
+          name: Hide Artifacts
+          reference: "https://attack.mitre.org/techniques/T1564/"
+          subtechnique:
+            - id: T1564.002
+              name: Hidden Users
+              reference: "https://attack.mitre.org/techniques/T1564/002/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1

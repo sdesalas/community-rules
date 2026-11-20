@@ -1,0 +1,62 @@
+id: "7de258e0-12da-52f3-ba23-44eb1abd1998_1"
+type: security-rule
+attributes:
+  author:
+    - Elastic Community
+  description: Identifies tccutil resetting privacy permissions. Malware resets permissions to prompt the user again under a misleading name.
+  from: now-9m
+  index:
+    - "logs-endpoint.events.process*"
+  language: eql
+  license: Elastic License v2
+  name: Privacy Permissions Reset via Tccutil
+  note: |
+    ## Triage and analysis
+
+    ### Investigating Privacy Permissions Reset via Tccutil
+
+    ### Possible investigation steps
+
+    - Review which service was reset and for which app.
+    - Check for permission prompts the user accepted afterwards.
+
+    ### False positive analysis
+
+    - Developers reset permissions while testing their apps. Exclude developer Macs.
+  query: |
+    process where host.os.type == "macos" and event.type == "start" and
+      process.name == "tccutil" and process.args == "reset"
+  related_integrations:
+    - package: endpoint
+      version: ">=8.2.0"
+  risk_score: 21
+  rule_id: "7de258e0-12da-52f3-ba23-44eb1abd1998"
+  setup: |
+    ## Setup
+
+    This rule requires data coming in from Elastic Defend.
+
+    ### Elastic Defend Integration Setup
+    Elastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.
+  severity: low
+  tags:
+    - "Domain: Endpoint"
+    - "OS: macOS"
+    - "Use Case: Threat Detection"
+    - "Tactic: Defense Evasion"
+    - "Data Source: Elastic Defend"
+    - "Resources: Investigation Guide"
+    - "Source: Community"
+  threat:
+    - framework: MITRE ATT&CK
+      tactic:
+        id: TA0005
+        name: Defense Evasion
+        reference: "https://attack.mitre.org/tactics/TA0005/"
+      technique:
+        - id: T1562
+          name: Impair Defenses
+          reference: "https://attack.mitre.org/techniques/T1562/"
+  timestamp_override: event.ingested
+  type: eql
+  version: 1
